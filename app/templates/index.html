@@ -1,8 +1,109 @@
 {% extends "base.html" %}
 
-{% block title %}Home - Where's Waldo?{% endblock %}
+{% block title %}Chat | Finding Waldo{% endblock %}
 
 {% block content %}
-    <h1>Where's Waldo?</h1>
-    <p>Hello World!</p>
+
+<div class="app-layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="brand">
+            <span>Finding Waldo</span>
+        </div>
+
+        <button id="new-chat" class="new-chat-btn">
+            + New Chat
+        </button>
+
+        <div class="sidebar-section">
+            <p class="sidebar-label">WORKSPACE</p>
+            <div class="sidebar-item active">
+                Waldo Detection
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <button id="theme-toggle" class="theme-btn">
+                Switch to light mode
+            </button>
+
+            <p class="version">Finding Waldo | CSCI 4350/5350</p>
+        </div>
+    </aside>
+
+    <!-- Main Chat -->
+    <main class="chat-panel">
+
+        <header class="chat-header">
+            <h1>Chat Bot</h1>
+            <span class="status-badge">Dev</span>
+        </header>
+
+        <section id="chat-messages"
+                 class="chat-messages"
+                 aria-live="polite">
+
+            <div id="welcome" class="welcome">
+                <div class="welcome-icon">
+                    <img
+                        src="{{ url_for('static', filename='images/waldo.svg') }}"
+                        alt="Illustration of Waldo"
+                        class="waldo-head"
+                    >
+                </div>
+
+                <h2>Where's Waldo?</h2>
+
+                <p>
+                    Upload an image and let our AI
+                    help you find Waldo.
+                </p>
+            </div>
+
+        </section>
+
+        <!-- Message Composer -->
+        <div class="composer-area">
+
+            <form id="chat-form" class="composer">
+                <textarea
+                    id="message-input"
+                    rows="1"
+                    aria-label="Chat message"
+                    placeholder="Ask me to find Waldo..."
+                    required
+                ></textarea>
+
+                <div class="composer-actions">
+
+                    <button
+                        type="button"
+                        id="attach-btn"
+                        class="icon-btn"
+                        title="Image upload coming soon"
+                        aria-label="Attach an image"
+                        disabled>
+                        📎
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="send-btn"
+                        aria-label="Send message">
+                        ↑
+                    </button>
+
+                </div>
+            </form>
+
+            <p class="chat-disclaimer">
+                Make sure to double-check results from the Finding Waldo AI!
+            </p>
+
+        </div>
+    </main>
+
+</div>
+
 {% endblock %}
