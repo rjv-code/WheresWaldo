@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", () => {
     const root = document.documentElement;
     const themeButton = document.getElementById("theme-toggle");
@@ -7,6 +6,24 @@ document.addEventListener("DOMContentLoaded", () => {
     const messages = document.getElementById("chat-messages");
     const newChatButton = document.getElementById("new-chat");
     const welcome = document.getElementById("welcome");
+    const attachButton = document.getElementById("attach-btn");
+    const imagePreview = document.getElementById("image-preview");
+    const previewImage = document.getElementById("preview-image");
+    const previewFilename = document.getElementById("preview-filename");
+    const removeImageButton = document.getElementById("remove-image");
+    const uploadError = document.getElementById("upload-error");
+    const imageInput = document.getElementById("image-input");
+
+    let selectedImage = null;
+    let previewUrl = null;
+
+    const allowedTypes = [
+        "image/png",
+        "image/jpeg",
+        "image/webp"
+    ];
+
+    const maxImageSize = 10485760; // 10 MB
 
     // default to dark or load theme
     let savedTheme = "dark";
@@ -36,6 +53,80 @@ document.addEventListener("DOMContentLoaded", () => {
     themeButton.addEventListener("click", () => {
         setTheme(root.dataset.theme === "dark" ? "light" : "dark");
     });
+
+    function showUploadError(message) {
+        uploadError.textContent = message;
+        uploadError.hidden = false;
+    }
+
+    function clearUploadError() {
+        uploadError.textContent = "";
+        uploadError.hidden = true;
+    }
+
+    function clearSelectedImage() {
+        selectedImage = null;
+        imageInput.value = "";
+
+        if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+            previewUrl = null;
+        }
+
+        previewImage.removeAttribute("src");
+        previewFilename.textContent = "";
+        imagePreview.hidden = true;
+        clearUploadError();
+    }
+
+    attachButton.addEventListener("click", () => {
+        imageInput.click();
+    });
+
+
+    // Handle image selection and display its preview
+    imageInput.addEventListener("change", () => {
+        const file = imageInput.files[0];
+
+        // User cancelled the file picker
+        if (!file) return;
+
+        // Clear any previous attachment
+        clearSelectedImage();
+
+        // Validate image format
+        if (!allowedTypes.includes(file.type)) {
+            showUploadError(
+                "Please select a PNG, JPEG or WebP image."
+            );
+            return;
+        }
+
+        // Validate image size
+        if (file.size > maxImageSize) {
+            showUploadError(
+                "The image must be 10 MB or smaller."
+            );
+            return;
+        }
+
+        // Store the selected file
+        selectedImage = file;
+
+        // Create a temporary URL for the browser preview
+        previewUrl = URL.createObjectURL(file);
+
+        // Display the image and its filename
+        previewImage.src = previewUrl;
+        previewFilename.textContent = file.name;
+        imagePreview.hidden = false;
+    });
+
+    // Allow users to remove their selected image
+    removeImageButton.addEventListener("click", () => {
+        clearSelectedImage();
+    });
+
 
     // Add a message to the conversation
     function addMessage(text, sender) {
@@ -83,6 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
         welcome.style.display = "";
 
         messageInput.value = "";
+        clearSelectedImage();
         messageInput.focus();
     });
 });

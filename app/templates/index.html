@@ -67,6 +67,24 @@
         <div class="composer-area">
 
             <form id="chat-form" class="composer">
+                <div id="image-preview" class="image-preview" hidden>
+                    <img id="preview-image" alt="Selected image preview">
+
+                    <div class="preview-info">
+                        <span id="preview-filename"></span>
+                        <button
+                            type="button"
+                            id="remove-image"
+                            class="remove-image-btn"
+                            aria-label="Remove selected image"
+                            title="Remove image">
+                            &times;
+                        </button>
+                    </div>
+                </div>
+
+                <p id="upload-error" class="upload-error" role="alert" hidden></p>
+                
                 <textarea
                     id="message-input"
                     rows="1"
@@ -81,11 +99,17 @@
                         type="button"
                         id="attach-btn"
                         class="icon-btn"
-                        title="Image upload coming soon"
+                        title="Attach an image"
                         aria-label="Attach an image"
-                        disabled>
+                        >
                         📎
                     </button>
+
+                    <input
+                        type="file"
+                        id="image-input"
+                        accept="image/png,image/jpeg,image/webp"
+                        hidden>
 
                     <button
                         type="submit"
