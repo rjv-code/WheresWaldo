@@ -171,6 +171,8 @@ document.addEventListener("DOMContentLoaded", () => {
         // need to have either text or an image
         if (!text && !selectedImage) return;
 
+        const hadImage = Boolean(selectedImage);
+
         // upload image if one was selected
         if (selectedImage) {
             const formData = new FormData();
@@ -212,7 +214,7 @@ document.addEventListener("DOMContentLoaded", () => {
         messageInput.value = "";
 
         // Placeholder until the AI backend is connected
-        addMessage("Demo reply: Image received. AI detection is not connected yet.", "assistant");
+        addMessage(hadImage ? "Demo reply: Image received. AI detection isn't connected yet." : "Demo reply: AI detection isn't connected yet.", "assistant");
     });
 
     // Allow Enter to send, Shift + Enter for a new line
