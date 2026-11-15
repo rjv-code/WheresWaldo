@@ -140,22 +140,79 @@ document.addEventListener("DOMContentLoaded", () => {
         messages.scrollTop = messages.scrollHeight;
     }
 
+
+    // Show uploaded image in the conversation
+    function addImageMessage(file) {
+        const message = document.createElement("div");
+        message.classList.add("message", "user");
+
+        const image = document.createElement("img");
+        const imageUrl = URL.createObjectURL(file);
+
+        image.src = imageUrl;
+        image.alt = file.name;
+        image.classList.add("chat-image");
+
+        image.addEventListener("load", () => {
+            URL.revokeObjectURL(imageUrl);
+        }, {once: true});
+
+        message.appendChild(image);
+        messages.appendChild(message);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
     // handle chat form
-    chatForm.addEventListener("submit", (event) => {
+    chatForm.addEventListener("submit", async (event) => {
         event.preventDefault();
 
         const text = messageInput.value.trim();
 
-        if (!text) return;
+        // need to have either text or an image
+        if (!text && !selectedImage) return;
 
+        // upload image if one was selected
+        if (selectedImage) {
+            const formData = new FormData();
+            formData.append("image", selectedImage);
+
+            try {
+                const response = await fetch("/api/upload", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    showUploadError(result.error || "Image upload failed.");
+                    return;
+                }
+            } catch(error) {
+                showUploadError("Couldn't connect to the upload server.");
+                return;
+            }
+        }
+
+        // hide welcome screen
         welcome.hidden = true;
         welcome.style.display = "none";
 
-        addMessage(text, "user");
+        // show user's message
+        if (text) {
+            addMessage(text, "user");
+        }
+
+        // show preview of uploaded image
+        if (selectedImage) {
+            addImageMessage(selectedImage);
+            clearSelectedImage();
+        }
+
         messageInput.value = "";
 
         // Placeholder until the AI backend is connected
-        addMessage("Demo reply: " + "AI detection is not connected yet.", "assistant");
+        addMessage("Demo reply: Image received. AI detection is not connected yet.", "assistant");
     });
 
     // Allow Enter to send, Shift + Enter for a new line
