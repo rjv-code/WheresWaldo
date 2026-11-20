@@ -1,0 +1,13 @@
+Run these commands for pretrained model:
+1. pip install ultralytics huggingface_hub pillow
+2. python find_waldo.py my_waldo_image.jpg
+
+Optional: (if the model cannot find 'waldo', we can try these commands)
+# Use the highest-accuracy 256px model instead
+python find_waldo.py my_waldo_image.jpg --tile-size 256
+
+# Lower confidence threshold if nothing is found
+python find_waldo.py my_waldo_image.jpg --conf 0.05
+
+# More overlap (slower but slightly better IoU)
+python find_waldo.py my_waldo_image.jpg --overlap 0.25
