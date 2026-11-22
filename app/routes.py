@@ -1,8 +1,6 @@
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, current_app
 
 main = Blueprint("main", __name__)
-
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
 
 @main.route("/")
 def home():
@@ -19,7 +17,7 @@ def upload_image():
     # check file extension
     extension = image.filename.rsplit(".", 1)[-1].lower()
 
-    if extension not in ALLOWED_EXTENSIONS:
+    if extension not in current_app.config["ALLOWED_EXTENSIONS"]:
         return jsonify({"error": "Wrong image format"}), 400
 
     return jsonify({"success": True, "message": "Image received successfully"})
