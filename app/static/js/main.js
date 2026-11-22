@@ -188,9 +188,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (!response.ok) {
                     showUploadError(result.message || result.error || "Image upload failed.");
+                    return;
                 }
-
-                return;
             } catch(error) {
                 showUploadError("Couldn't connect to the upload server.");
                 return;
