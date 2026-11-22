@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, current_app
 from app.validation import validate_image
 from app.search_controller import search_image
 
@@ -42,8 +42,19 @@ def search():
     if error:
         return validation_error_response(error)
 
-    # pass validated image to search controller
-    result = search_image(image)
+    try:
+        # pass validated image to search controller
+        result = search_image(image)
 
-    # return result as JSON
-    return jsonify(result), 200
+        # return result as JSON
+        return jsonify(result), 200
+    except Exception:
+        # record exception in Flask server logs
+        current_app.logger.exception("Image search failed unexpectedly")
+
+        # return safe error response to client
+        return jsonify({
+            "success": False,
+            "error": "SEARCH_FAILED",
+            "message": "An unexpected error occurred while processing the image."
+        }), 500
