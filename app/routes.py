@@ -1,4 +1,5 @@
-from flask import Blueprint, render_template, request, jsonify, current_app
+from flask import Blueprint, render_template, request, jsonify
+from app.validation import validate_image
 
 main = Blueprint("main", __name__)
 
@@ -8,22 +9,26 @@ def home():
 
 @main.route("/api/upload", methods = ["POST"])
 def upload_image():
-    # check if an image was sent
-    if "image" not in request.files:
-        return jsonify({"error": "No file selected"}), 400
+    image = request.files.get("image")
 
-    image = request.files["image"]
+    # perform validation on image
+    error = validate_image(image)
 
-    # check file extension
-    extension = image.filename.rsplit(".", 1)[-1].lower()
-
-    if extension not in current_app.config["ALLOWED_EXTENSIONS"]:
-        return jsonify({"error": "Wrong image format"}), 400
+    if error:
+        return jsonify({"error": error}), 400
 
     return jsonify({"success": True, "message": "Image received successfully"})
 
 @main.route("/api/search", methods = ["POST"])
 def search():
+    image = request.files.get("image")
+
+    # perform validation on image
+    error = validate_image(image)
+    
+    if error:
+        return jsonify({"error": error}), 400
+
     # temp until search controller implemented
     return jsonify({
         "success": True,
