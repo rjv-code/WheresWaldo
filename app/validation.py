@@ -21,5 +21,18 @@ def validate_image(image):
     if extension not in current_app.config["ALLOWED_EXTENSIONS"]:
         return "Wrong image format"
 
+    # check file size
+    image.stream.seek(0, 2)
+    file_size = image.stream.tell()
+    image.stream.seek(0)
+
+    # reject empty files
+    if file_size == 0:
+        return "File is empty"
+
+    # reject too large images
+    if file_size > current_app.config["MAX_IMAGE_SIZE"]:
+        return "Image is larger than 10 MB"
+
     # no validation errors
     return None
