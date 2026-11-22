@@ -179,7 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
             formData.append("image", selectedImage);
 
             try {
-                const response = await fetch("/api/upload", {
+                const response = await fetch("/api/search", {
                     method: "POST",
                     body: formData
                 });
