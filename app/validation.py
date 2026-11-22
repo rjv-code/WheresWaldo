@@ -1,4 +1,7 @@
+import warnings
+
 from flask import current_app
+from PIL import Image, UnidentifiedImageError
 
 def validate_image(image):
     # check if image provided
@@ -33,6 +36,36 @@ def validate_image(image):
     # reject too large images
     if file_size > current_app.config["MAX_IMAGE_SIZE"]:
         return "Image is larger than 10 MB"
+
+    # match file extensions w/actual image formats
+    expected_formats = {
+        "png": "PNG",
+        "jpg": "JPEG",
+        "jpeg": "JPEG",
+        "webp": "WEBP"
+    }
+
+    try:
+        # decompression bombs are validation errors
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", Image.DecompressionBombWarning)
+
+            # inspect uploaded image
+            with Image.open(image.stream) as img:
+                actual_format = img.format
+
+                # confirm actual format matches extension
+                if actual_format != expected_formats[extension]:
+                    return "Image format doesn't match file extension"
+
+                # verify image integrity
+                img.verify()
+    except (UnidentifiedImageError, OSError, ValueError, Image.DecompressionBombWarning, Image.DecompressionBombError):
+        return "Invalid or corrupted image"
+    finally:
+        # reset stream for future image processing
+        image.stream.seek(0)
+
 
     # no validation errors
     return None
