@@ -172,6 +172,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!text && !selectedImage) return;
 
         const hadImage = Boolean(selectedImage);
+        let searchResult = null;
 
         // upload image if one was selected
         if (selectedImage) {
@@ -190,6 +191,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     showUploadError(result.message || result.error || "Image upload failed.");
                     return;
                 }
+
+                // store successful search result
+                searchResult = result;
             } catch(error) {
                 showUploadError("Couldn't connect to the upload server.");
                 return;
@@ -213,8 +217,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         messageInput.value = "";
 
-        // Placeholder until the AI backend is connected
-        addMessage(hadImage ? "Demo reply: Image received. AI detection isn't connected yet." : "Demo reply: AI detection isn't connected yet.", "assistant");
+        // display response from search controller
+        if (hadImage && searchResult) {
+            const reply = searchResult.mock ? `[Demo] ${searchResult.message}` : searchResult.message;
+
+            addMessage(reply, "assistant");
+        } else {
+            // text-only messages don't feed into the search API
+            addMessage("Demo reply: Text-based AI chat isn't connected yet", "assistant");
+        }
     });
 
     // Allow Enter to send, Shift + Enter for a new line
