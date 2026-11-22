@@ -3,6 +3,18 @@
     Output/Post-Condition: Returns a dict with structured search results
 """
 def search_image(image):
-    # placeholder implementation to be added later
+    # temporary result until integration finished
 
-    raise NotImplementedError("Image search controller not implemented yet")
+    return {
+        "success": True,
+        "mock": True,
+        "found": True,
+        "message": "Simulated detection, no AI detection",
+        "detections": [{
+            "x1": 100.0,
+            "y1": 150.0,
+            "x2": 150.0,
+            "y2": 230.0,
+            "confidence": 0.95
+        }]
+    }
