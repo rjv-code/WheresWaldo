@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, jsonify
 from app.validation import validate_image
+from app.search_controller import search_image
 
 main = Blueprint("main", __name__)
 
@@ -41,10 +42,8 @@ def search():
     if error:
         return validation_error_response(error)
 
-    # temp until search controller implemented
-    return jsonify({
-        "success": True,
-        "mock": True,
-        "message": "Search endpoint is operating fine",
-        "detections": []
-    }), 200
+    # pass validated image to search controller
+    result = search_image(image)
+
+    # return result as JSON
+    return jsonify(result), 200
