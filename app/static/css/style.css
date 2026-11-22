@@ -326,6 +326,13 @@ body {
     filter: brightness(1.15);
 }
 
+
+.send-btn:disabled {
+    cursor: wait;
+    opacity: 0.6;
+}
+
+
 .chat-disclaimer {
     text-align: center;
     color: var(--muted);
