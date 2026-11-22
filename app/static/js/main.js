@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const root = document.documentElement;
     const themeButton = document.getElementById("theme-toggle");
     const chatForm = document.getElementById("chat-form");
+    const sendButton = document.querySelector(".send-btn");
     const messageInput = document.getElementById("message-input");
     const messages = document.getElementById("chat-messages");
     const newChatButton = document.getElementById("new-chat");
@@ -16,6 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let selectedImage = null;
     let previewUrl = null;
+    let isSubmitting = false;
 
     const allowedTypes = [
         "image/png",
@@ -62,6 +64,22 @@ document.addEventListener("DOMContentLoaded", () => {
     function clearUploadError() {
         uploadError.textContent = "";
         uploadError.hidden = true;
+    }
+
+    function setSubmitting(submitting){
+        isSubmitting = submitting;
+
+        // disable sending and image changes while processing
+        sendButton.disabled = submitting;
+        attachButton.disabled = submitting;
+        removeImageButton.disabled = submitting;
+        imageInput.disabled = submitting;
+        newChatButton.disabled = submitting;
+        messageInput.readOnly = submitting;
+
+        // update button appearance
+        sendButton.textContent = submitting ? "..." : "↑";
+        sendButton.setAttribute("aria-label", submitting ? "Processing image" : "Send message");
     }
 
     function clearSelectedImage() {
@@ -166,6 +184,9 @@ document.addEventListener("DOMContentLoaded", () => {
     chatForm.addEventListener("submit", async (event) => {
         event.preventDefault();
 
+        // prevent duplicate submissions
+        if (isSubmitting) return;
+
         const text = messageInput.value.trim();
 
         // need to have either text or an image
@@ -174,57 +195,78 @@ document.addEventListener("DOMContentLoaded", () => {
         const hadImage = Boolean(selectedImage);
         let searchResult = null;
 
+        clearUploadError();
+        setSubmitting(true);
+
         // upload image if one was selected
-        if (selectedImage) {
-            const formData = new FormData();
-            formData.append("image", selectedImage);
+        try {
+            // send images through the Flask search API
+            if (selectedImage) {
+                const formData = new FormData();
+                formData.append("image", selectedImage);
 
-            try {
-                const response = await fetch("/api/search", {
-                    method: "POST",
-                    body: formData
-                });
+                let response;
 
-                const result = await response.json();
+                try {
+                    response = await fetch("/api/search", {
+                        method: "POST",
+                        body: formData
+                    });
+                } catch(error) {
+                    throw new Error("Couldn't connect to the search server.");
+                }
 
-                if (!response.ok) {
-                    showUploadError(result.message || result.error || "Image upload failed.");
-                    return;
+                // try decoding server's JSON response
+                let result;
+
+                try {
+                    result = await response.json();
+                } catch (error) {
+                    throw new Error("Server returned invalid response.");
+                }
+
+                // handle unsuccessful HTTP requests
+                if (!response.ok || result.success === false) {
+                    throw new Error(result.message || "Image search failed.");
                 }
 
                 // store successful search result
                 searchResult = result;
-            } catch(error) {
-                showUploadError("Couldn't connect to the upload server.");
-                return;
             }
-        }
 
-        // hide welcome screen
-        welcome.hidden = true;
-        welcome.style.display = "none";
+            // hide welcome screen after processing
+            welcome.hidden = true;
+            welcome.style.display = "none";
 
-        // show user's message
-        if (text) {
-            addMessage(text, "user");
-        }
+            // display user's text
+            if (text)
+                addMessage(text, "user");
 
-        // show preview of uploaded image
-        if (selectedImage) {
-            addImageMessage(selectedImage);
-            clearSelectedImage();
-        }
+            // display uploaded image
+            if (selectedImage) {
+                addImageMessage(selectedImage);
+                clearSelectedImage();
+            }
 
-        messageInput.value = "";
+            messageInput.value = "";
 
-        // display response from search controller
-        if (hadImage && searchResult) {
-            const reply = searchResult.mock ? `[Demo] ${searchResult.message}` : searchResult.message;
+            // display search controller's response
+            if (hadImage && searchResult) {
+                const reply = searchResult.mock ? `Demo reply: ${searchResult.message}` : searchResult.message;
 
-            addMessage(reply, "assistant");
-        } else {
-            // text-only messages don't feed into the search API
-            addMessage("Demo reply: Text-based AI chat isn't connected yet", "assistant");
+                addMessage(reply, "assistant");
+            } else {
+                // text-only not implented through search API
+                addMessage("Demo reply: Text-based AI chat isn't connected yet", "assistant");
+            }
+        } catch (error) {
+            // preserve image & text in case we need to retry
+            showUploadError(error.message || "An unexpected error occurred.");
+
+            console.error("Chat submission failed:", error);
+        } finally {
+            // restore form controls
+            setSubmitting(false);
         }
     });
 
