@@ -12,7 +12,7 @@ def create_app():
     # return JSON when request exceeds upload limits
     @app.errorhandler(RequestEntityTooLarge)
     def handle_large_upload(error):
-        return jsonify({"success": False, "error": "Upload is larger than 10 MB"}), 413
+        return jsonify({"success": False, "error": "IMAGE_TOO_LARGE", "message": "Image is larger than 10 MB"}), 413
 
     # register app routes
     from app.routes import main
