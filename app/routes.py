@@ -21,3 +21,13 @@ def upload_image():
         return jsonify({"error": "Wrong image format"}), 400
 
     return jsonify({"success": True, "message": "Image received successfully"})
+
+@main.route("/api/search", methods = ["POST"])
+def search():
+    # temp until search controller implemented
+    return jsonify({
+        "success": True,
+        "mock": True,
+        "message": "Search endpoint is operating fine",
+        "detections": []
+    }), 200
