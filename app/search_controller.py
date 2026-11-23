@@ -1,3 +1,5 @@
+from app.detector import detect_waldo
+
 """ Creates a consistent response for image searches
     Input/Pre-Condition: Takes a list of detection dictionaries and a bool for if the detections are simulated or not
     Output/Post-Condition: Returns a dict with structured search results
@@ -21,17 +23,9 @@ def build_search_response(detections, mock = True):
 
 """ Coordinates an image search request.
     Input/Pre-Condition: Accepts an image, which is a validated Flask FileStorage object
-    Output/Post-Condition: Returns a dict with structured search results
+    Output/Post-Condition: Returns a dict with structured search results from YOLOv8
 """
 def search_image(image):
-    # temporary result until integration finished
+    detections = detect_waldo(image)
 
-    detections = [{
-        "x1": 100.0,
-        "y1": 150.0,
-        "x2": 150.0,
-        "y2": 230.0,
-        "confidence": 0.95
-    }]
-
-    return build_search_response(detections, mock = True)
+    return build_search_response(detections, mock = False)

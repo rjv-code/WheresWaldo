@@ -1,4 +1,5 @@
 import io
+import pytest
 
 from PIL import Image
 
@@ -17,6 +18,26 @@ def create_test_image():
 
     return image_stream
 
+@pytest.fixture
+def mock_search(monkeypatch):
+    """Replaces the search controller with predictable test results"""
+    def fake_search(image):
+        return {
+            "success": True,
+            "mock": False,
+            "found": True,
+            "message": "Waldo may have been found.",
+            "detections": [{
+                "x1": 100.0,
+                "y1": 150.0,
+                "x2": 150.0,
+                "y2": 230.0,
+                "confidence": 0.95
+            }]
+        }
+
+    monkeypatch.setattr("app.routes.search_image", fake_search)
+
 
 def test_homepage(client):
     """Checks that the homepage loads successfully"""
@@ -26,7 +47,7 @@ def test_homepage(client):
     assert b"Finding Waldo" in response.data
 
 
-def test_upload_valid_image(client):
+def test_upload_valid_image(client, mock_search):
     """Checks that the upload endpoint accepts a valid image"""
     response = client.post("/api/upload", data = {"image": (create_test_image(), "waldo.png")}, content_type = "multipart/form-data")
 
@@ -38,7 +59,7 @@ def test_upload_valid_image(client):
     assert result["message"] == "Image received successfully"
 
 
-def test_search_valid_image(client):
+def test_search_valid_image(client, mock_search):
     """Checks that the search endpoint returns structured results"""
     response = client.post("/api/search", data = {"image": (create_test_image(), "waldo.png")}, content_type = "multipart/form-data")
 
@@ -47,12 +68,12 @@ def test_search_valid_image(client):
     result = response.get_json()
 
     assert result["success"] is True
-    assert result["mock"] is True
+    assert result["mock"] is False
     assert result["found"] is True
     assert isinstance(result["detections"], list)
 
 
-def test_search_detection_structure(client):
+def test_search_detection_structure(client, mock_search):
     """Checks the bounding-box format returned by controller"""
     response = client.post("/api/search", data = {"image": (create_test_image(), "waldo.png")}, content_type = "multipart/form-data")
 
