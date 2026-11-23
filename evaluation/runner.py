@@ -27,6 +27,7 @@ def evaluate_image(case, search_function):
     return {
         "image_id": case["image_id"],
         "found": predicted is not None,
+        "waldo_present": actual is not None,
         "iou": evaluation["iou"],
         "classification": evaluation["classification"],
         "reward": evaluation["reward"],

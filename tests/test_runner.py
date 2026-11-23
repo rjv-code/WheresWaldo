@@ -21,6 +21,7 @@ def test_evaluate_correct_detection():
 
     assert result["image_id"] == "image1.png"
     assert result["found"] is True
+    assert result["waldo_present"] is True
     assert result["iou"] == pytest.approx(1.0)
     assert result["classification"] == "correct"
     assert result["reward"] == 1.0
@@ -63,6 +64,7 @@ def test_evaluate_absent_waldo():
     result = evaluate_image(case, search_function)
 
     assert result["found"] is False
+    assert result["waldo_present"] is False
     assert result["iou"] is None
     assert result["classification"] == "correct"
     assert result["reward"] == 1.0
