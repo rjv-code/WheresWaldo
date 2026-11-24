@@ -62,6 +62,11 @@ def validate_image(image):
                 img.verify()
     except (UnidentifiedImageError, OSError, ValueError, Image.DecompressionBombWarning, Image.DecompressionBombError):
         return ("INVALID_IMAGE", "Invalid or corrupted image")
+    except ModuleNotFoundError as exc:
+        if exc.name != "pi_heif":
+            raise
+
+        return("INVALID_IMAGE", "Invalid or corrupted image")
     finally:
         # reset stream for future image processing
         image.stream.seek(0)

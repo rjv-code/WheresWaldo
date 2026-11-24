@@ -25,7 +25,7 @@ def test_search_response_with_detections():
     detections = [{
         "x1": 100.0,
         "y1": 150.0,
-        "x2": 100.0,
+        "x2": 150.0,
         "y2": 230.0,
         "confidence": 0.95
     }]
@@ -59,18 +59,38 @@ def test_search_response_without_mock():
     assert result["message"] == "No Waldo detected."
 
 
-def test_search_image_placeholder():
-    """Checks that the placeholder controller returns structured results"""
+def test_search_image_uses_detector(monkeypatch):
+    """
+    Checks that the search controller uses YOLOv8 detections
+    Input/Pre-Condition: Valid image and simulated detector output
+    Output/Post-Condition: Returns structured non-mock search results
+    """
+    detections = [{
+        "x1": 100.0,
+        "y1": 150.0,
+        "x2": 150.0,
+        "y2": 230.0,
+        "confidence": 0.95
+    }]
+
+    def fake_detector(image):
+        return {
+            "detections": detections,
+            "regions_examined": 16
+        }
+
+    monkeypatch.setattr("app.search_controller.detect_waldo", fake_detector)
+
     result = search_image(create_test_image())
 
     assert result["success"] is True
-    assert result["mock"] is True
+    assert result["mock"] is False
     assert result["found"] is True
+    assert result["detections"] == detections
 
     assert len(result["detections"]) == 1
-
-    detection = result["detections"][0]
-    assert detection["confidence"] == 0.95
+    assert result["detections"][0]["confidence"] == 0.95
+    assert result["regions_examined"] == 16
 
 
 def test_search_controller_failure(client, monkeypatch):

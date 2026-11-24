@@ -48,6 +48,21 @@ def iou(box1: dict, box2: dict) -> float:
 # ---------------------------------------------------------------------------
 # Tiled inference
 # ---------------------------------------------------------------------------
+def tile_starts(length, tile, stride):
+    """
+    Calculates tile starting positions to cover an image dimension
+    Input/Pre-Condition: Image dimension, tile size, and stride
+    Output/Post-Condition: Returns tile positions covering the dimension
+    """
+    if length <= tile:
+        return [0]
+
+    starts = list(range(0, length - tile + 1, stride))
+
+    if starts[-1] != length - tile:
+        starts.append(length - tile)
+
+    return starts
 
 def find_waldo(
     image_path: str,
@@ -55,6 +70,7 @@ def find_waldo(
     tile_size: int = 512,
     overlap: float = 0.125,
     conf: float = 0.1,
+    return_details: bool = False,
 ) -> list[dict]:
  
     img = Image.open(image_path).convert("RGB")
@@ -62,12 +78,19 @@ def find_waldo(
     print(f"[2/3] Running tiled inference on {img_w}×{img_h}px image ...")
     print(f"      tile_size={tile_size}px  overlap={overlap*100:.1f}%  conf={conf}")
 
-    stride = int(tile_size * (1 - overlap))
+    if not 0 <= overlap <= 0.5:
+        raise ValueError("Overlap must be between 0 and 0.5")
+
+    stride = max(1, int(tile_size * (1 - overlap)))
+
+    x_positions = tile_starts(img_w, tile_size, stride)
+    y_positions = tile_starts(img_h, tile_size, stride)
+
     all_detections: list[dict] = []
     tile_count = 0
 
-    for y in range(0, img_h - tile_size + 1, stride):
-        for x in range(0, img_w - tile_size + 1, stride):
+    for y in y_positions:
+        for x in x_positions:
             tile = img.crop((x, y, x + tile_size, y + tile_size))
             results = model.predict(tile, conf=conf, verbose=False, imgsz=tile_size)
             tile_count += 1
@@ -96,6 +119,13 @@ def find_waldo(
         all_detections = [d for d in all_detections if iou(best, d) < 0.5]
 
     print(f"      After NMS: {len(keep)} detection(s).\n")
+    
+    if return_details:
+        return {
+            "detections": keep,
+            "regions_examined": tile_count
+        }
+
     return keep
 
 
