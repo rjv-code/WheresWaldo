@@ -159,7 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    // Show uploaded image in the conversation
+    // Show the user's original uploaded image
     function addImageMessage(file) {
         const message = document.createElement("div");
         message.classList.add("message", "user");
@@ -179,6 +179,87 @@ document.addEventListener("DOMContentLoaded", () => {
         messages.appendChild(message);
         messages.scrollTop = messages.scrollHeight;
     }
+
+
+
+    // show annotated image as separate response
+    function addAnnotatedImageMessage(file, detections) {
+        if (!detections || detections.length === 0) return;
+
+        const message = document.createElement("div");
+        message.classList.add("message", "assistant");
+
+        const image = new Image();
+        const imageUrl = URL.createObjectURL(file);
+
+        image.onload = () => {
+            URL.revokeObjectURL(imageUrl);
+
+            const canvas = document.createElement("canvas");
+            canvas.width = image.naturalWidth;
+            canvas.height = image.naturalHeight;
+
+            const ctx = canvas.getContext("2d");
+            if (!ctx) return;
+
+            ctx.drawImage(image, 0, 0);
+
+            // draw a box around the highest-confidence candidate
+            const detection = detections[0];
+
+            // Keep bounding-box coordinates within the image
+            const x1 = Math.max(0, Math.min(detection.x1, canvas.width));
+            const y1 = Math.max(0, Math.min(detection.y1, canvas.height));
+            const x2 = Math.max(0, Math.min(detection.x2, canvas.width));
+            const y2 = Math.max(0, Math.min(detection.y2, canvas.height));
+
+            if (x2 <= x1 || y2 <= y1) return;
+
+            const lineWidth = Math.max(5, Math.round(Math.min(canvas.width, canvas.height) / 200));
+
+            ctx.strokeStyle = "#FF3B30";
+            ctx.lineWidth = lineWidth;
+
+            // Draw the outline inside the predicted bounding box
+            ctx.strokeRect(
+                x1 + lineWidth / 2,
+                y1 + lineWidth / 2,
+                Math.max(0, x2 - x1 - lineWidth),
+                Math.max(0, y2 - y1 - lineWidth)
+            );
+
+            // Create an annotated image without modifying the original
+            canvas.toBlob((blob) => {
+                if (!blob) return;
+
+                const annotatedUrl = URL.createObjectURL(blob);
+                const annotatedImage = document.createElement("img");
+
+                annotatedImage.src = annotatedUrl;
+                annotatedImage.alt = "Image with possible Waldo location marked";
+                annotatedImage.classList.add("chat-image");
+
+                annotatedImage.addEventListener("load", () => {
+                    URL.revokeObjectURL(annotatedUrl);
+                }, { once: true });
+
+                message.appendChild(annotatedImage);
+                messages.scrollTop = messages.scrollHeight;
+
+            }, "image/png");
+        };
+
+        image.onerror = () => {
+            URL.revokeObjectURL(imageUrl);
+            message.textContent = "Couldn't generate the annotated image.";
+        };
+
+        image.src = imageUrl;
+
+        messages.appendChild(message);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
 
     // handle chat form
     chatForm.addEventListener("submit", async (event) => {
@@ -245,7 +326,6 @@ document.addEventListener("DOMContentLoaded", () => {
             // display uploaded image
             if (selectedImage) {
                 addImageMessage(selectedImage);
-                clearSelectedImage();
             }
 
             messageInput.value = "";
@@ -259,7 +339,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     const detection = searchResult.detections[0];
 
                     const centerX = Math.round((detection.x1 + detection.x2) / 2);
-                    const centerY = Math.round((detection.y1 = detection.y2) / 2);
+                    const centerY = Math.round((detection.y1 + detection.y2) / 2);
                     const confidence = (detection.confidence * 100).toFixed(1);
 
                     reply += `\nPossible location: (${centerX}, ${centerY})`;
@@ -277,9 +357,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
                 addMessage(reply, "assistant");
+
+                // send separate annotated image from assistant
+                if (searchResult.found && searchResult.detections.length > 0) {
+                    addAnnotatedImageMessage(selectedImage, searchResult.detections);
+                }
             } else {
                 // text-only not implented through search API
                 addMessage("Demo reply: Text-based AI chat isn't connected yet", "assistant");
+            }
+
+            // clear attachment after showing results
+            if (hadImage) {
+                clearSelectedImage();
             }
         } catch (error) {
             // preserve image & text in case we need to retry
