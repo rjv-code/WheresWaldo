@@ -252,7 +252,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // display search controller's response
             if (hadImage && searchResult) {
-                const reply = searchResult.mock ? `Demo reply: ${searchResult.message}` : searchResult.message;
+                let reply = searchResult.message;
+
+                // show location & confidence if Waldo was detected
+                if (searchResult.found && searchResult.detections.length > 0) {
+                    const detection = searchResult.detections[0];
+
+                    const centerX = Math.round((detection.x1 + detection.x2) / 2);
+                    const centerY = Math.round((detection.y1 = detection.y2) / 2);
+                    const confidence = (detection.confidence * 100).toFixed(1);
+
+                    reply += `\nPossible location: (${centerX}, ${centerY})`;
+                    reply += `\nConfidence: ${confidence}%`;
+                }
+
+                // make sure simulated results get shown differently
+                if (searchResult.mock) {
+                    reply = `Demo reply: ${reply}`;
+                }
+
+                // show number of regions examined
+                if (searchResult.regions_examined != null) {
+                    reply += `\nRegions examined: ${searchResult.regions_examined}`;
+                }
 
                 addMessage(reply, "assistant");
             } else {
