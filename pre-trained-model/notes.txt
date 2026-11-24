@@ -11,3 +11,13 @@ python find_waldo.py my_waldo_image.jpg --conf 0.05
 
 # More overlap (slower but slightly better IoU)
 python find_waldo.py my_waldo_image.jpg --overlap 0.25
+
+# Here's an update from Alex 11/23/2026
+
+--- Accuracy evaluation ---
+Run: python evaluate.py --weights waldo_yolov8s_tile256.pt --data .\waldo-data\test --tile 256
+Pretrained tile256 model on winx-ueton (all splits, 57 Waldo images):
+top-box detection 74% (42/57), top-3 93% (53/57), avg IoU 0.85.
+Limitations: dataset has 58 images, same as the model's training set size, so it may overlap
+training data (results may be optimistic). Only 1 non-Waldo image, so false alarms not measured.
+Future work: truly unseen labeled test set; re-rank top-3 detections (most misses had Waldo 2nd/3rd).
