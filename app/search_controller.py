@@ -4,7 +4,7 @@ from app.detector import detect_waldo
     Input/Pre-Condition: Takes a list of detection dictionaries and a bool for if the detections are simulated or not
     Output/Post-Condition: Returns a dict with structured search results
 """
-def build_search_response(detections, mock = True):
+def build_search_response(detections, mock = True, regions_examined = None):
     found = len(detections) > 0
 
     if mock:
@@ -17,7 +17,8 @@ def build_search_response(detections, mock = True):
         "mock": mock,
         "found": found,
         "message": message,
-        "detections": detections
+        "detections": detections,
+        "regions_examined": regions_examined
     }
 
 
@@ -26,6 +27,6 @@ def build_search_response(detections, mock = True):
     Output/Post-Condition: Returns a dict with structured search results from YOLOv8
 """
 def search_image(image):
-    detections = detect_waldo(image)
+    result = detect_waldo(image)
 
-    return build_search_response(detections, mock = False)
+    return build_search_response(result["detections"], mock = False, regions_examined=result["regions_examined"])

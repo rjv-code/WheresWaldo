@@ -57,12 +57,13 @@ def detect_waldo(image, tile_size=512, overlap=0.125, conf=0.1):
 
         image.save(image_path)
 
-        detections = detector.find_waldo(
+        result = detector.find_waldo(
             str(image_path),
             model,
             tile_size=tile_size,
             overlap=overlap,
-            conf=conf
+            conf=conf,
+            return_details=True
         )
 
-    return detections
+    return result

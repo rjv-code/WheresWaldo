@@ -74,7 +74,10 @@ def test_search_image_uses_detector(monkeypatch):
     }]
 
     def fake_detector(image):
-        return detections
+        return {
+            "detections": detections,
+            "regions_examined": 16
+        }
 
     monkeypatch.setattr("app.search_controller.detect_waldo", fake_detector)
 
@@ -87,6 +90,7 @@ def test_search_image_uses_detector(monkeypatch):
 
     assert len(result["detections"]) == 1
     assert result["detections"][0]["confidence"] == 0.95
+    assert result["regions_examined"] == 16
 
 
 def test_search_controller_failure(client, monkeypatch):

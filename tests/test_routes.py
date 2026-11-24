@@ -33,7 +33,8 @@ def mock_search(monkeypatch):
                 "x2": 150.0,
                 "y2": 230.0,
                 "confidence": 0.95
-            }]
+            }],
+            "regions_examined": 16
         }
 
     monkeypatch.setattr("app.routes.search_image", fake_search)
