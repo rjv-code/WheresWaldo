@@ -9,5 +9,3 @@ __pycache__/
 pre-trained-model/waldo-data/
 *.csv
 *.zip
-rl_cache.json
-*.npy
