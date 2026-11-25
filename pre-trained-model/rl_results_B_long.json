@@ -1,0 +1,105 @@
+{
+  "stop_conf": 0.7,
+  "args": {
+    "weights": "waldo_yolov8s_tile256.pt",
+    "data": "waldo-data",
+    "grid": 4,
+    "cell_overlap": 0.25,
+    "tile": 256,
+    "top_k": 3,
+    "stop_conf": null,
+    "episodes": 100000,
+    "alpha": 0.1,
+    "gamma": 0.95,
+    "eps_end": 0.05,
+    "max_steps": 30,
+    "seed": 0,
+    "cache": "rl_cache.json",
+    "q_out": "q_table_B.npy",
+    "results_out": "rl_results_B_long.json"
+  },
+  "train": [
+    {
+      "method": "Row-by-row scan",
+      "found": 27,
+      "n_pos": 42,
+      "found_rate": 0.6428571428571429,
+      "false_finds": 4,
+      "avg_cells_checked": 9.928571428571429
+    },
+    {
+      "method": "Random order (avg of 20)",
+      "found": 27.05,
+      "n_pos": 42,
+      "found_rate": 0.6440476190476189,
+      "false_finds": 3.95,
+      "avg_cells_checked": 8.435714285714287
+    },
+    {
+      "method": "Highest stripe first (no RL)",
+      "found": 26,
+      "n_pos": 42,
+      "found_rate": 0.6190476190476191,
+      "false_finds": 5,
+      "avg_cells_checked": 8.428571428571429
+    },
+    {
+      "method": "Q-learning agent (B)",
+      "found": 27,
+      "n_pos": 42,
+      "found_rate": 0.6428571428571429,
+      "false_finds": 4,
+      "avg_cells_checked": 7.761904761904762
+    },
+    {
+      "method": "Full scan, best box",
+      "found": 30,
+      "n_pos": 42,
+      "found_rate": 0.7142857142857143,
+      "false_finds": 12,
+      "avg_cells_checked": 16.0
+    }
+  ],
+  "eval": [
+    {
+      "method": "Row-by-row scan",
+      "found": 11,
+      "n_pos": 15,
+      "found_rate": 0.7333333333333333,
+      "false_finds": 1,
+      "avg_cells_checked": 9.5625
+    },
+    {
+      "method": "Random order (avg of 20)",
+      "found": 9.9,
+      "n_pos": 15,
+      "found_rate": 0.6599999999999998,
+      "false_finds": 2.1,
+      "avg_cells_checked": 8.90625
+    },
+    {
+      "method": "Highest stripe first (no RL)",
+      "found": 10,
+      "n_pos": 15,
+      "found_rate": 0.6666666666666666,
+      "false_finds": 2,
+      "avg_cells_checked": 8.5
+    },
+    {
+      "method": "Q-learning agent (B)",
+      "found": 8,
+      "n_pos": 15,
+      "found_rate": 0.5333333333333333,
+      "false_finds": 4,
+      "avg_cells_checked": 9.6875
+    },
+    {
+      "method": "Full scan, best box",
+      "found": 12,
+      "n_pos": 15,
+      "found_rate": 0.8,
+      "false_finds": 4,
+      "avg_cells_checked": 16.0
+    }
+  ]
+}
