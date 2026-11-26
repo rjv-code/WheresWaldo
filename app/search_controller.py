@@ -1,10 +1,11 @@
-from app.detector import detect_waldo
+from app.rl_detector import detect_waldo_rl
 
-""" Creates a consistent response for image searches
+def build_search_response(detections, mock = True, regions_examined = None):
+    """ 
+    Creates a consistent response for image searches
     Input/Pre-Condition: Takes a list of detection dictionaries and a bool for if the detections are simulated or not
     Output/Post-Condition: Returns a dict with structured search results
-"""
-def build_search_response(detections, mock = True, regions_examined = None):
+    """
     found = len(detections) > 0
 
     if mock:
@@ -22,11 +23,16 @@ def build_search_response(detections, mock = True, regions_examined = None):
     }
 
 
-""" Coordinates an image search request.
-    Input/Pre-Condition: Accepts an image, which is a validated Flask FileStorage object
-    Output/Post-Condition: Returns a dict with structured search results from YOLOv8
-"""
 def search_image(image):
-    result = detect_waldo(image)
+    """ 
+    Coordinates an image search request using Q-learning Agent B
+    Input/Pre-Condition: Accepts an image, which is a validated Flask FileStorage object
+    Output/Post-Condition: Returns detections, grid cells examined, and YOLO inference info
+    """
+    result = detect_waldo_rl(image)
 
-    return build_search_response(result["detections"], mock = False, regions_examined=result["regions_examined"])
+    response = build_search_response(result["detections"], mock=False, regions_examined=result["regions_examined"])
+    response["search_method"] = result["search_method"]
+    response["yolo_tiles_processed"] = result["yolo_tiles_processed"]
+
+    return response

@@ -76,10 +76,12 @@ def test_search_image_uses_detector(monkeypatch):
     def fake_detector(image):
         return {
             "detections": detections,
-            "regions_examined": 16
+            "regions_examined": 5,
+            "yolo_tiles_processed": 100,
+            "search_method": "q_learning_b"
         }
 
-    monkeypatch.setattr("app.search_controller.detect_waldo", fake_detector)
+    monkeypatch.setattr("app.search_controller.detect_waldo_rl", fake_detector)
 
     result = search_image(create_test_image())
 
@@ -90,7 +92,11 @@ def test_search_image_uses_detector(monkeypatch):
 
     assert len(result["detections"]) == 1
     assert result["detections"][0]["confidence"] == 0.95
-    assert result["regions_examined"] == 16
+
+    # agent B test
+    assert result["regions_examined"] == 5
+    assert result["yolo_tiles_processed"] == 100
+    assert result["search_method"] == "q_learning_b"
 
 
 def test_search_controller_failure(client, monkeypatch):
@@ -113,4 +119,33 @@ def test_search_controller_failure(client, monkeypatch):
     assert result["success"] is False
     assert result["error"] == "SEARCH_FAILED"
     assert isinstance(result["message"], str)
-    
+
+
+def test_search_image_without_detections(monkeypatch):
+    """
+    Checks how the controller handles an unsuccessful Agent B search
+    Input/Pre-Condition: Simulated Agent B output without detections
+    Output/Pre-ConditionL Returns a non-mock response showing no detection
+    """
+
+    def fake_detector(image):
+        return {
+            "detections": [],
+            "regions_examined": 2,
+            "yolo_tiles_processed": 100,
+            "search_method": "q_learning_b"
+        }
+
+    monkeypatch.setattr("app.search_controller.detect_waldo_rl", fake_detector)
+
+    result = search_image(create_test_image())
+
+    assert result["success"] is True
+    assert result["mock"] is False
+    assert result["found"] is False
+    assert result["detections"] == []
+    assert result["message"] == "No Waldo detected."
+
+    assert result["regions_examined"] == 2
+    assert result["yolo_tiles_processed"] == 100
+    assert result["search_method"] == "q_learning_b"
