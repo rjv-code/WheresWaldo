@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const sendButton = document.querySelector(".send-btn");
     const messageInput = document.getElementById("message-input");
     const messages = document.getElementById("chat-messages");
+    const searchMethod = document.getElementById("searchMethod");
     const newChatButton = document.getElementById("new-chat");
     const welcome = document.getElementById("welcome");
     const attachButton = document.getElementById("attach-btn");
@@ -76,6 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
         imageInput.disabled = submitting;
         newChatButton.disabled = submitting;
         messageInput.readOnly = submitting;
+        searchMethod.disabled = submitting;
 
         // update button appearance
         sendButton.textContent = submitting ? "..." : "↑";
@@ -217,7 +219,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const lineWidth = Math.max(5, Math.round(Math.min(canvas.width, canvas.height) / 200));
 
-            ctx.strokeStyle = "#FF3B30";
+            ctx.strokeStyle = "#F2B600";
             ctx.lineWidth = lineWidth;
 
             // Draw the outline inside the predicted bounding box
@@ -285,6 +287,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (selectedImage) {
                 const formData = new FormData();
                 formData.append("image", selectedImage);
+                formData.append("method", searchMethod ? searchMethod.value : "q_learning_b");
 
                 let response;
 

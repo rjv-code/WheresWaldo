@@ -21,7 +21,7 @@ def create_test_image():
 @pytest.fixture
 def mock_search(monkeypatch):
     """Replaces the search controller with predictable test results"""
-    def fake_search(image):
+    def fake_search(image, method="q_learning_b"):
         return {
             "success": True,
             "mock": False,
@@ -96,3 +96,26 @@ def test_search_detection_structure(client, mock_search):
     assert detection["x1"] < detection["x2"]
     assert detection["y1"] < detection["y2"]
     assert 0 <= detection["confidence"] <= 1
+
+
+def test_search_rejects_invalid_method(client):
+    """
+    Checks API validation of the selected search method
+    Input/Pre-Condition: Valid image and unsupported method
+    Output/Post-Condition: Error 400 w/structured response
+    """
+    response = client.post(
+        "/api/search",
+        data={
+            "image": (create_test_image(), "waldo.png"),
+            "method": "invalid_method"
+        },
+        content_type="multipart/form-data"
+    )
+
+    assert response.status_code == 400
+
+    result = response.get_json()
+
+    assert result["success"] is False
+    assert result["error"] == "INVALID_SEARCH_METHOD"
