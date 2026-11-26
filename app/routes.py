@@ -42,9 +42,18 @@ def search():
     if error:
         return validation_error_response(error)
 
+    method = request.form.get("method", "q_learning_b")
+
+    if method not in ("q_learning_b", "yolo"):
+        return jsonify({
+            "success": False,
+            "error": "INVALID_SEARCH_METHOD",
+            "message": "Invalid search method selected."
+        }), 400
+
     try:
         # pass validated image to search controller
-        result = search_image(image)
+        result = search_image(image, method=method)
 
         # return result as JSON
         return jsonify(result), 200

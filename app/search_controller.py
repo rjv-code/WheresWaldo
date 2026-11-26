@@ -1,4 +1,7 @@
+from app.detector import detect_waldo
 from app.rl_detector import detect_waldo_rl
+
+SEARCH_METHODS = ("q_learning_b", "yolo")
 
 def build_search_response(detections, mock = True, regions_examined = None):
     """ 
@@ -23,16 +26,24 @@ def build_search_response(detections, mock = True, regions_examined = None):
     }
 
 
-def search_image(image):
+def search_image(image, method="q_learning_b"):
     """ 
-    Coordinates an image search request using Q-learning Agent B
-    Input/Pre-Condition: Accepts an image, which is a validated Flask FileStorage object
+    Coordinates an image search request using selected detection method
+    Input/Pre-Condition: Accepts an image, which is a validated Flask FileStorage object, and search method
     Output/Post-Condition: Returns detections, grid cells examined, and YOLO inference info
     """
-    result = detect_waldo_rl(image)
+    if method not in SEARCH_METHODS:
+        raise ValueError(f"Unsupported search method: {method}")
+
+    if method == "q_learning_b":
+        result = detect_waldo_rl(image)
+    else:
+        result = detect_waldo(image)
 
     response = build_search_response(result["detections"], mock=False, regions_examined=result["regions_examined"])
-    response["search_method"] = result["search_method"]
-    response["yolo_tiles_processed"] = result["yolo_tiles_processed"]
+    response["search_method"] = method
+
+    if "yolo_tiles_processed" in result:
+        response["yolo_tiles_processed"] = result["yolo_tiles_processed"]
 
     return response

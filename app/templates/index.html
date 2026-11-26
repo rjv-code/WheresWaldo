@@ -84,6 +84,19 @@
                 </div>
 
                 <p id="upload-error" class="upload-error" role="alert" hidden></p>
+
+                <div class="search-method-control">
+                    <label for="searchMethod">Detection method</label>
+
+                    <select id="searchMethod" name="method">
+                        <option value="q_learning_b" selected>
+                            Q-learning Agent B
+                        </option>
+                        <option value="yolo">
+                            YOLOv8 baseline
+                        </option>
+                    </select>
+                </div>
                 
                 <textarea
                     id="message-input"
