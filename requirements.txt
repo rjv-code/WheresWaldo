@@ -3,3 +3,4 @@ Pillow==13.0.0
 pytest==9.2.0
 ultralytics
 huggingface_hub
+numpy

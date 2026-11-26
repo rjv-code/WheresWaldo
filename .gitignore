@@ -11,3 +11,6 @@ pre-trained-model/waldo-data/
 *.zip
 rl_cache.json
 *.npy
+!pre-trained-model/q_table_B.npy
+*_reproduced.json
+*_reproduced.npy
